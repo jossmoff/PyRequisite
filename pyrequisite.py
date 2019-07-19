@@ -8,6 +8,7 @@ from collections import OrderedDict
 import time
 import os
 import re
+import selenium
 
 module_name = "pyRequisite: Find library prerequisites for Python"
 __version__ = "0.1.0"
@@ -15,25 +16,20 @@ __version__ = "0.1.0"
 
 
 def pip_search(library):
-  output = subprocess.check_output(["pip ", "install", library],
+  output = subprocess.check_output(["pip3", "install", library],
                                     stderr=subprocess.PIPE)
-  sys.stdout.write("Finding prerequisites for : " + library)
-  sys.stdout.write(' [SEARCHING]')  # write the next character 
-  text = str(output)
-  libraries = []
-  # Ignore first item from split as it will contain irrelevant data
-  results = text.split(r"Requirement already satisfied: ")[1:]
-
-  # Iterate over the results and then first word is the library we want
-  for result in results:
-    library = result.split(">=")[0]
-    library = library.split(" in")[0]
-    libraries.append(library)
+  sys.stdout.write('🔎 Finding prerequisites for : ' + library)
+  sys.stdout.write(' ⏱️')  # write the next character 
+  sys.stdout.flush()
   time.sleep(1)
-  for i in range(11):
-    sys.stdout.flush()
-    sys.stdout.write('\b')
-  sys.stdout.write(' [FINISHED]')
+  text = str(output)
+
+  # Ignore first item from split as it will contain irrelevant data
+  libraries = text.split(r'Installing collected packages: ')[1].split('\\n')[0].split(', ')
+  # Iterate over the results and then first word is the library we want
+  sys.stdout.flush()
+  sys.stdout.write('\b')
+  sys.stdout.write('✔️')
   print()
   return libraries
   
@@ -81,57 +77,58 @@ def format_freeze(string):
    
 
 def main():
+  # Get installed libraries
+  installed_libraries = str(subprocess.check_output(["pip3", "freeze"],
+                                  stderr=subprocess.PIPE))
 
-    # Get installed libraries
-    installed_libraries = str(subprocess.check_output(["pip", "freeze"],
-                                    stderr=subprocess.PIPE))
-    
-    # Turns the text from pip freeze into a list of all libraries
-    installed_libraries = list(map(format_freeze, (installed_libraries[2:]
-                                                   .split("\\r\\n"))))[:-1]
-    parser = ArgumentParser(description=module_name)
-    parser.add_argument('-f','--file',
-                        action="store_true", dest="file", default=False,
-                        help="Specifies whethers libraries is a file.")
-    parser.add_argument('-d','--directory',
-                        action="store_true", dest="directory", default=False,
-                        help="""Specifies whethers libraries is a directory
-                                to be searched.""")
-    parser.add_argument(type=str, dest='libraries',
-                        help="The set of top-level libraries in your project")
-    args = parser.parse_args()
-    
-    # Person puts in a text file
-    if args.file:
-      with open(args.libraries) as f:
-        libraries = f.read().splitlines()
-        
-    # Person puts in a directory to be searched
-    elif args.directory:
+  # Turns the text from pip freeze into a list of all libraries
+  installed_libraries = list(map(format_freeze, (installed_libraries[2:].split("\\n"))))[:-1]
+  parser = ArgumentParser(description=module_name)
+  parser.add_argument('-f','--file',
+                      action="store_true", dest="file", default=False,
+                      help="Specifies whethers libraries is a file.")
+  parser.add_argument('-d','--directory',
+                      action="store_true", dest="directory", default=False,
+                      help="""Specifies whethers libraries is a directory
+                              to be searched.""")
+  parser.add_argument(type=str, dest='libraries',
+                      help="The set of top-level libraries in your project")
+  parser.add_argument('-o','--output',
+                      action="store_true", dest="directory", default=False,
+                      help="""Specifies whethers libraries is a directory
+                              to be searched.""")
+  
+  args = parser.parse_args()
+  
+  # Person puts in a text file
+  if args.file:
+    with open(args.libraries) as f:
+      libraries = f.read().splitlines()
       
-      # Finds all .py files in a directory 
-      files = file_search(args.libraries)
-      found_libraries = []
-      for file in files:
-        found_libraries = list(OrderedDict.fromkeys(found_libraries
-                                                    + scan_for_libraries(file)))
-      libraries = []
-      
-      # Does the intersection of found libraries and installed libraries
-      for library in found_libraries:
-        if library in installed_libraries:
-          libraries.append(library)        
-      
-    else:
-      libraries = args.libraries.split(",")
-      
-    # Make sure all inputted libraries are actually installed
-    for library in libraries:
-      if library.lower() not in installed_libraries:
-        raise Exception("Library: " + library + " is not installed.")
-    if len(libraries) == 0:
-      prereqs = "No prerequisites are needed for this input."
-    else:
-      prereqs = library_search(libraries, 0)
+  # Person puts in a directory to be searched
+  elif args.directory:
+    # Finds all .py files in a directory 
+    files = file_search(args.libraries)
+    found_libraries = []
+    for file in files:
+      found_libraries = list(OrderedDict.fromkeys(found_libraries
+                                                  + scan_for_libraries(file)))
+    libraries = []
+    # Does the intersection of found libraries and installed libraries
+    for library in found_libraries:
+      if library in installed_libraries:
+        libraries.append(library)        
+  else:
+    libraries = args.libraries.split(",")
+
+  # Make sure all inputted libraries are actually installed
+  for library in libraries:
+    if library.lower() not in installed_libraries:
+      raise Exception("Library: " + library + " is not installed.")
+  
+  if len(libraries) == 0:
+    prereqs = "No prerequisites are needed for this input."
+  else:
+    prereqs = library_search(libraries, 0)
 if __name__ == "__main__":
   main()
