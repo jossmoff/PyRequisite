@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin python3
 # -*- coding: UTF-8 -*-
 
 import subprocess
@@ -10,7 +10,7 @@ import os
 import re
 
 module_name = "PyRequisite: Find library prerequisites for Python"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 
@@ -18,7 +18,7 @@ def pip_search(library):
   output = subprocess.check_output(["pip3", "install", library],
                                     stderr=subprocess.PIPE)
   sys.stdout.write('🔎 Finding prerequisites for : ' + library)
-  sys.stdout.write(' ⏱️')  # write the next character 
+  sys.stdout.write(' ⏱️')  # write the next character
   sys.stdout.flush()
   time.sleep(1)
   text = str(output)
@@ -31,7 +31,7 @@ def pip_search(library):
   sys.stdout.write('✔️')
   print()
   return libraries
-  
+
 def library_search(libraries, index):
   new_libraries = pip_search(libraries[index])
   new_libraries = list(OrderedDict.fromkeys(libraries + new_libraries))
@@ -40,7 +40,7 @@ def library_search(libraries, index):
     new_libraries = list(OrderedDict.fromkeys(libraries
                                               + library_search(new_libraries,
                                                                 index)))
-  
+
   return new_libraries
 
 # Searches directory for python files ~ Needs optimizing
@@ -82,8 +82,8 @@ def print_prereqs(prereqs, project):
     print("  No prerequisites are needed for this input set.")
   for prereq in prereqs:
     print(" > " + prereq)
-  
-   
+
+
 
 def main():
   # Get installed libraries
@@ -104,18 +104,18 @@ def main():
                       help="The set of top-level libraries in your project")
   parser.add_argument('-o','--output', dest="output", default=False,
                       help="""Specifies whethers should be redirected to a file.""")
-  
+
   args = parser.parse_args()
-  
+
   project = ""
   # Person puts in a text file
   if args.file:
     with open(args.libraries) as f:
       libraries = f.read().splitlines()
-      
+
   # Person puts in a directory to be searched
   elif args.directory:
-    # Finds all .py files in a directory 
+    # Finds all .py files in a directory
     project = os.path.abspath(args.libraries).split('/')[-1]
     files = file_search(args.libraries)
     found_libraries = []
@@ -126,7 +126,7 @@ def main():
     # Does the intersection of found libraries and installed libraries
     for library in found_libraries:
       if library in installed_libraries:
-        libraries.append(library)   
+        libraries.append(library)
   else:
     libraries = args.libraries.split(",")
 
