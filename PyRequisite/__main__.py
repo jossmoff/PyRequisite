@@ -17,11 +17,11 @@ __version__ = "0.2.0"
 def pip_search(library):
   output = subprocess.check_output(["pip3", "install", library],
                                     stderr=subprocess.PIPE)
+  text = str(output)
   sys.stdout.write('🔎 Finding prerequisites for : ' + library)
-  sys.stdout.write(' ⏱️')  # write the next character
+  sys.stdout.write(' ')  # write the next character
   sys.stdout.flush()
   time.sleep(1)
-  text = str(output)
 
   # Ignore first item from split as it will contain irrelevant data
   libraries = text.split(r'Installing collected packages: ')[1].split('\\n')[0].split(', ')
@@ -58,11 +58,13 @@ def scan_for_libraries(file_):
     from_import_libraries = re.findall("from \w*", file_text)
     import_libraries = re.findall("import \w*", file_text)
 
-    for index in range(len(from_import_libraries)):
+    for index_val in enumerate(from_import_libraries):
+      index = index_val[0]
       from_import_libraries[index] = (from_import_libraries[index]
                                       .replace("from ", ""))
 
-    for index in range(len(import_libraries)):
+    for index_val in enumerate(import_libraries):
+      index = index_val[0]
       import_libraries[index] = (import_libraries[index]
                                  .replace("import ", ""))
     libraries = list(OrderedDict.fromkeys(from_import_libraries
@@ -78,7 +80,7 @@ def print_prereqs(prereqs, project):
     print(project + "'s Prerequisites:")
   else:
     print("Prerequisites:")
-  if type(prereqs) is str or len(prereqs) == 0:
+  if isinstance(prereqs, str) or len(prereqs) == 0:
     print("  No prerequisites are needed for this input set.")
   for prereq in prereqs:
     print(" > " + prereq)
@@ -103,15 +105,15 @@ def main():
   parser.add_argument(type=str, dest='libraries',
                       help="The set of top-level libraries in your project")
   parser.add_argument('-o','--output', dest="output", default=False,
-                      help="""Specifies whethers should be redirected to a file.""")
+                      help="""Specifies the output name of the file if you
+                               wish to output it to one.""")
 
   args = parser.parse_args()
 
   project = ""
   # Person puts in a text file
   if args.file:
-    with open(args.libraries) as f:
-      libraries = f.read().splitlines()
+    libraries = scan_for_libraries(args.libraries)
 
   # Person puts in a directory to be searched
   elif args.directory:
