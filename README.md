@@ -16,7 +16,8 @@ joss@moff:~$: git clone https://github.com/JossMoff/PyRequisite.git
 joss@moff:~$: cd PyRequisite
 
 # Install PyRequisite onto your system
-joss@moff:~$: python3 setup.py install```
+joss@moff:~$: python3 setup.py install
+```
 
 > Sometimes the last step will require sudo as you might not has write access to /usr/local/lib/python3.6/dist-packages/
 
@@ -39,7 +40,8 @@ optional arguments:
                         searched.
   -o OUTPUT, --output OUTPUT
                         Specifies the output name of the file if
-                        you wish to output it to one.```
+                        you wish to output it to one.
+```
 
 ## Usage with no flags
 
