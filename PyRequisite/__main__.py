@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import subprocess
-from argparse import ArgumentParser, RawDescriptionHelpFormatter, FileType
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 import sys
 from collections import OrderedDict
 import time
