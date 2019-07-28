@@ -2,6 +2,7 @@
 # PyRequisite
 
 <a target="_blank" href="https://www.python.org/downloads/" title="Python version"><img src="https://img.shields.io/badge/python-%3E=_3.6-green.svg"></a>
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a2939a39906b4086ad64a25aef7e2862)](https://app.codacy.com/app/JossMoff/PyRequisite?utm_source=github.com&utm_medium=referral&utm_content=JossMoff/PyRequisite&utm_campaign=Badge_Grade_Dashboard)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 **PyRequisite** allows you to find project prerequisites for Python  modules when you forget to start a virtual enviroment.
